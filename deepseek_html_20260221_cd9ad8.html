@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор чистой прибыли (АУСН 20%) — расширенный</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .calculator {
+            max-width: 700px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            margin-top: 0;
+            color: #1e3c5c;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #2b6f9b;
+            padding-bottom: 10px;
+        }
+        h2 {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin: 20px 0 10px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        .input-group input[type="number"] {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #d0ddee;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border 0.2s;
+        }
+        .input-group input[type="number"]:focus {
+            border-color: #2b6f9b;
+            outline: none;
+        }
+        .expense-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            background: #f9fcff;
+            padding: 10px 15px;
+            border-radius: 12px;
+        }
+        .expense-row > * {
+            flex: 1 1 auto;
+        }
+        .expense-row .label {
+            min-width: 140px;
+            font-weight: 600;
+            color: #1e3c5c;
+        }
+        .expense-row input[type="number"] {
+            width: 160px;
+            padding: 8px 12px;
+            border: 2px solid #d0ddee;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            background: #eef3f9;
+            padding: 5px 12px;
+            border-radius: 25px;
+        }
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .radio-group input[type="radio"] {
+            margin: 0;
+            cursor: pointer;
+        }
+        .credit-block {
+            background: #eaf2f9;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .credit-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: flex-end;
+        }
+        .credit-field {
+            flex: 1 1 180px;
+        }
+        .credit-field label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #1e3c5c;
+        }
+        .credit-field input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #b8cee4;
+            border-radius: 8px;
+        }
+        .interest-display {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: white;
+            padding: 12px 18px;
+            border-radius: 40px;
+            border: 1px solid #b8cee4;
+        }
+        .interest-amount {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #1e3c5c;
+            background: #d4e3f0;
+            padding: 5px 15px;
+            border-radius: 30px;
+        }
+        .button {
+            background: #2b6f9b;
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            margin: 25px 0 15px;
+            transition: background 0.2s;
+        }
+        .button:hover {
+            background: #1e4f73;
+        }
+        .results {
+            background: #e6f0fa;
+            border-radius: 20px;
+            padding: 20px 25px;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #b0c9de;
+            font-size: 1.2rem;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-label {
+            font-weight: 600;
+            color: #1e3c5c;
+        }
+        .result-value {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+        }
+        .tax { color: #c44536; }
+        .profit { color: #1e7640; }
+        .note {
+            background: #fcf4e8;
+            padding: 15px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            color: #6b4f32;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="calculator">
+    <h1>🧮 Чистая прибыль (АУСН 20%) — расширенный расчёт</h1>
+
+    <!-- Доход -->
+    <div class="input-group">
+        <label>💰 Сумма контракта (доход), ₽</label>
+        <input type="number" id="contract" step="0.01" min="0" value="0" placeholder="Например: 1 500 000">
+    </div>
+
+    <h2>📦 Расходы (укажите форму оплаты)</h2>
+
+    <!-- Закуп -->
+    <div class="expense-row">
+        <span class="label">Закуп товара</span>
+        <input type="number" id="zakup" step="0.01" min="0" value="0" placeholder="0.00">
+        <div class="radio-group">
+            <label><input type="radio" name="type_zakup" value="cashless" checked> Безнал</label>
+            <label><input type="radio" name="type_zakup" value="cash"> Наличные</label>
+        </div>
+    </div>
+
+    <!-- Логистика -->
+    <div class="expense-row">
+        <span class="label">Логистика</span>
+        <input type="number" id="logist" step="0.01" min="0" value="0" placeholder="0.00">
+        <div class="radio-group">
+            <label><input type="radio" name="type_logist" value="cashless" checked> Безнал</label>
+            <label><input type="radio" name="type_logist" value="cash"> Наличные</label>
+        </div>
+    </div>
+
+    <!-- Комиссия площадки -->
+    <div class="expense-row">
+        <span class="label">Комиссия площадки</span>
+        <input type="number" id="commission" step="0.01" min="0" value="0" placeholder="0.00">
+        <div class="radio-group">
+            <label><input type="radio" name="type_commission" value="cashless" checked> Безнал</label>
+            <label><input type="radio" name="type_commission" value="cash"> Наличные</label>
+        </div>
+    </div>
+
+    <!-- Монтаж -->
+    <div class="expense-row">
+        <span class="label">Монтаж</span>
+        <input type="number" id="montage" step="0.01" min="0" value="0" placeholder="0.00">
+        <div class="radio-group">
+            <label><input type="radio" name="type_montage" value="cashless" checked> Безнал</label>
+            <label><input type="radio" name="type_montage" value="cash"> Наличные</label>
+        </div>
+    </div>
+
+    <h2>🏦 Кредитные параметры</h2>
+    <div class="credit-block">
+        <div class="credit-row">
+            <div class="credit-field">
+                <label>Сумма кредита, ₽</label>
+                <input type="number" id="creditAmount" step="0.01" min="0" value="0" placeholder="0.00">
+            </div>
+            <div class="credit-field">
+                <label>Длина сделки (дней)</label>
+                <input type="number" id="dealDays" step="1" min="0" value="0" placeholder="30">
+            </div>
+            <div class="credit-field">
+                <label>Процент годовых, %</label>
+                <input type="number" id="creditRate" step="0.1" min="0" value="0" placeholder="15">
+            </div>
+        </div>
+
+        <!-- Проценты (вычисляются) + выбор формы оплаты -->
+        <div class="interest-display">
+            <span style="font-weight:600;">💸 Проценты за кредит:</span>
+            <span class="interest-amount" id="interestValue">0.00 ₽</span>
+            <div class="radio-group" style="margin-left: auto;">
+                <label><input type="radio" name="type_interest" value="cashless" checked> Безнал</label>
+                <label><input type="radio" name="type_interest" value="cash"> Наличные</label>
+            </div>
+        </div>
+        <div style="font-size:0.9rem; color:#2b4f6e; margin-top:8px;">
+            * проценты рассчитываются автоматически: сумма кредита × (дней/365) × (ставка/100)
+        </div>
+    </div>
+
+    <button class="button" onclick="calculate()">Рассчитать прибыль</button>
+
+    <div class="results" id="results">
+        <div class="result-item">
+            <span class="result-label">💰 Налог (20% от дохода − безнал. расходы):</span>
+            <span class="result-value tax" id="taxResult">0.00 ₽</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">📊 Бухгалтерская прибыль (без учёта наличных):</span>
+            <span class="result-value" id="accountingResult">0.00 ₽</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">💎 Чистая прибыль (с учётом всех трат):</span>
+            <span class="result-value profit" id="netResult">0.00 ₽</span>
+        </div>
+    </div>
+
+    <div class="note">
+        ⚡ <strong>Как это работает</strong><br>
+        • В доходы идёт сумма контракта.<br>
+        • Расходы разделены на безналичные (уменьшают налог) и наличные (не уменьшают).<br>
+        • Проценты по кредиту рассчитываются за период сделки и добавляются к расходам согласно выбранной форме оплаты.<br>
+        • Налог = 20% × max(0, доход − безналичные расходы (включая проценты, если выбрано «безнал»)).<br>
+        • Бухгалтерская прибыль без учёта наличных = доход − безналичные расходы − налог.<br>
+        • Чистая прибыль = доход − все расходы (безнал + нал + проценты) − налог.
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        // ---- Сбор данных ----
+        const contract = parseFloat(document.getElementById('contract').value) || 0;
+
+        // Расходы с выбором формы
+        const zakup = parseFloat(document.getElementById('zakup').value) || 0;
+        const logist = parseFloat(document.getElementById('logist').value) || 0;
+        const commission = parseFloat(document.getElementById('commission').value) || 0;
+        const montage = parseFloat(document.getElementById('montage').value) || 0;
+
+        // Типы оплаты для расходов
+        const typeZakup = document.querySelector('input[name="type_zakup"]:checked').value;
+        const typeLogist = document.querySelector('input[name="type_logist"]:checked').value;
+        const typeCommission = document.querySelector('input[name="type_commission"]:checked').value;
+        const typeMontage = document.querySelector('input[name="type_montage"]:checked').value;
+
+        // Кредитные параметры
+        const credit = parseFloat(document.getElementById('creditAmount').value) || 0;
+        const days = parseFloat(document.getElementById('dealDays').value) || 0;
+        const rate = parseFloat(document.getElementById('creditRate').value) || 0;
+
+        // Расчёт процентов по кредиту
+        let interest = 0;
+        if (credit > 0 && days > 0 && rate > 0) {
+            interest = credit * (days / 365) * (rate / 100);
+        }
+        // Отображаем сумму процентов рядом
+        document.getElementById('interestValue').innerText = interest.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
+
+        // Тип оплаты процентов
+        const typeInterest = document.querySelector('input[name="type_interest"]:checked').value;
+
+        // ---- Распределение расходов на безнал и нал ----
+        let cashlessExpenses = 0; // безналичные (уменьшают налог)
+        let cashExpenses = 0;     // наличные (не уменьшают)
+
+        // Функция добавления расхода
+        function addExpense(amount, type) {
+            if (type === 'cashless') {
+                cashlessExpenses += amount;
+            } else {
+                cashExpenses += amount;
+            }
+        }
+
+        addExpense(zakup, typeZakup);
+        addExpense(logist, typeLogist);
+        addExpense(commission, typeCommission);
+        addExpense(montage, typeMontage);
+        addExpense(interest, typeInterest); // проценты добавляем как расход
+
+        // ---- Расчёт налога ----
+        const taxBase = contract - cashlessExpenses;
+        const tax = taxBase > 0 ? taxBase * 0.2 : 0;
+
+        // ---- Прибыль ----
+        const accountingProfit = contract - cashlessExpenses - tax;            // бухгалтерская без учёта наличных
+        const netProfit = contract - cashlessExpenses - cashExpenses - tax;    // чистая (все траты)
+
+        // ---- Форматированный вывод ----
+        const formatMoney = (value) => {
+            return value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
+        };
+
+        document.getElementById('taxResult').innerText = formatMoney(tax);
+        document.getElementById('accountingResult').innerText = formatMoney(accountingProfit);
+        document.getElementById('netResult').innerText = formatMoney(netProfit);
+    }
+
+    // Привязать расчёт к изменению полей кредита, чтобы сумма процентов обновлялась сразу
+    document.getElementById('creditAmount').addEventListener('input', updateInterestPreview);
+    document.getElementById('dealDays').addEventListener('input', updateInterestPreview);
+    document.getElementById('creditRate').addEventListener('input', updateInterestPreview);
+
+    function updateInterestPreview() {
+        const credit = parseFloat(document.getElementById('creditAmount').value) || 0;
+        const days = parseFloat(document.getElementById('dealDays').value) || 0;
+        const rate = parseFloat(document.getElementById('creditRate').value) || 0;
+        let interest = 0;
+        if (credit > 0 && days > 0 && rate > 0) {
+            interest = credit * (days / 365) * (rate / 100);
+        }
+        document.getElementById('interestValue').innerText = interest.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
+    }
+
+    // Автоматический расчёт при загрузке
+    window.onload = function() {
+        updateInterestPreview();
+        calculate();
+    };
+</script>
+</body>
+</html>
